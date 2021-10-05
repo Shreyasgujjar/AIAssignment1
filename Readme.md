@@ -37,7 +37,7 @@ python3 Assignment1.py -h
 * To run the code for a specifit input file.
 ```
 python3 Assignment1.py -f file_name.txt
-``
+```
 
 * To select a specific algorithm.
 ```

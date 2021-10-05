@@ -24,34 +24,38 @@ OOOOOBSO
     OOOO
 ```
 
-1. Basic code run with a default game input and default algorithm of BFS.
+* Basic code run with a default game input and default algorithm of BFS.
 ```
 python3 Assignment1.py
 ```
 
-2. To get basic documentation of the program.
+* To get basic documentation of the program.
 ```
-python3 Assignment.py -h
+python3 Assignment1.py -h
 ```
 
-3. To select a specific algorithm.
+* To run the code for a specifit input file.
+```
+python3 Assignment1.py -f file_name.txt
+``
+
+* To select a specific algorithm.
 ```
 python3 Assignment1.py -a algorithm_name
 ```
 
-4. To select a specific heuristic. (Available only for A* and Gredy Best First)
+* To select a specific heuristic. (Available only for A* and Gredy Best First)
 ```
-python3 Assignment.py -a astar -t heuristic_type
+python3 Assignment1.py -a astar -t heuristic_type
 ```
 
-5. To show the stack trace/To see how the computer plays the game
+* To show the stack trace/To see how the computer plays the game
 ```
-python3 Assignment.py -s
+python3 Assignment1.py -s
 ```
 
 Basic documentation of the game - 
 ```
-Assignment 1
 -h      help
 -a      algorithm
 -f      inputfile

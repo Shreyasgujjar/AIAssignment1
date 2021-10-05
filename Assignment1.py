@@ -4,6 +4,7 @@ from operator import itemgetter
 import getopt, sys
 import time
 
+# Function to read the inital state of the board from a file
 def readBoard(fileName):
     with open(fileName) as f:
         fileData = f.read()
@@ -12,26 +13,51 @@ def readBoard(fileName):
         print(board_state)
         return board_state
 
-
+# Display the board state at any point of time
 def showGame(data):
   for s in data:
     print(s)
 
+# The program was initially written with a different format which did not work.
+# Part of the older program is taken and implemented here.
+# To enable the conversions between the previous and the current data type.
+# This function has been implemented
+# Function which converts to a matrix
 def convertToNewFormat(node):
   returnData = []
   for data in node:
     returnData.append([char for char in data])
   return returnData
 
+# The program was initially written with a different format which did not work.
+# Part of the older program is taken and implemented here.
+# To enable the conversions between the previous and the current data type.
+# This function has been implemented
+# Function which converts matrix to a simple array
 def convertToOldFormat(node):
   returnData = []
   for data in node:
     returnData.append(''.join(data))
   return returnData
 
+# This function check if there is any movement in the box from the previous state.
+# This function is used only in the astar algorithm.
 def isBoxMoved(node, parentNode):
-  return len(set(tuple(node)).intersection(set(tuple(parentNode))))
+  currentState = []
+  prevState = []
+  for data in node:
+    if 'R' in data:
+      currentState.append(data.replace('R', ' '))
+    else:
+      currentState.append(data)
+  for data in parentNode:
+    if 'R' in data:
+      prevState.append(data.replace('R', ' '))
+    else:
+      prevState.append(data);
+  return len(set(tuple(currentState)).intersection(set(tuple(prevState))))
 
+# Checked the current possition of the robot and returns the x, y co-ordinates.
 def findCurrentRobotPosition(currentPosition):
       for i in range(0, len(currentPosition)):
         if "R" in currentPosition[i]:
@@ -39,6 +65,8 @@ def findCurrentRobotPosition(currentPosition):
                 if currentPosition[i][j] == "R":
                     return i, j
 
+# checkes the current box position with the given board state.
+# Returns the x, y co-ordinates of the boxes.
 def findCurrentBoxPosition(currentPosition):
   x_list = []
   y_list = []
@@ -50,6 +78,8 @@ def findCurrentBoxPosition(currentPosition):
           y_list.append(j)
   return x_list, y_list
 
+# checkes the final position(goal state) with the initial board state.
+# Returns the x, y co-ordinates of the final state.
 def findGoalStateValues(node):
   x_list = []
   y_list = []
@@ -61,6 +91,8 @@ def findGoalStateValues(node):
           y_list.append(j)
   return x_list, y_list
 
+# Calculated the manhattan distance leaving out all the obstacles
+# previous distance is the number of moves the box has made in the previous state.
 def manhattanDistance(node, prevDistance = 0):
   s_x, s_y = findGoalStateValues(board)
   b_x, b_y = findCurrentBoxPosition(node)
@@ -74,6 +106,8 @@ def manhattanDistance(node, prevDistance = 0):
     final_distances.append(min(distances))
   return sum(final_distances) + prevDistance
 
+# Check if the box is stuck in some corner.
+# This method is used only for the implementation of the non trivial heuristic.
 def boxPushPossible(node):
   s_x, s_y = findGoalStateValues(board)
   b_x, b_y = findCurrentBoxPosition(node)
@@ -104,7 +138,8 @@ def boxPushPossible(node):
   except:
     return False
         
-
+# Heuristic which calculates the distance similar to manhattan distance
+# But checks if the box is stuck in some unmovable state and returns the distance to be 2500
 def nonTrivialHuristicDistance(node, prevDistance = 0):
   s_x, s_y = findGoalStateValues(board)
   b_x, b_y = findCurrentBoxPosition(node)
@@ -121,6 +156,7 @@ def nonTrivialHuristicDistance(node, prevDistance = 0):
   else:
     return 2500
 
+# Method to check if the goal state is achieved
 def checkSolved(node):
   if node == False:
     return False
@@ -130,6 +166,7 @@ def checkSolved(node):
   boxPositions = [(b_x[i], b_y[i]) for i in range(0, len(b_x))]
   return len(set(boxPositions)) == len(set(boxPositions).intersection(set(goalStates)))
 
+# Methods implemented to check if the robot can move upwards, downwards and sideways.
 def isMoveUpLegal(node):
   x, y = findCurrentRobotPosition(node)
   if x > 0:
@@ -178,6 +215,7 @@ def isMoveRightLegal(currentPosition):
   else:
     return False
 
+# Make the robot go up and send the state
 def moveUp(node):
   x, y = findCurrentRobotPosition(node)
   box_x, box_y = findCurrentBoxPosition(node)
@@ -197,7 +235,7 @@ def moveUp(node):
   else:
     # print("Can't go up")
     return False
-
+# Make the robot go down and send the state
 def moveDown(node):
   x, y = findCurrentRobotPosition(node)
   box_x, box_y = findCurrentBoxPosition(node)
@@ -218,6 +256,7 @@ def moveDown(node):
     # print("Can't go down")
     return False
 
+# Make the robot go right and send the state
 def moveRight(node):
   x, y = findCurrentRobotPosition(node)
   newData = convertToNewFormat(node)
@@ -237,6 +276,7 @@ def moveRight(node):
     # print("Can't go right")
     return False
 
+# Make the robot go left and send the state
 def moveLeft(node):
   x, y = findCurrentRobotPosition(node)
   newData = convertToNewFormat(node)
@@ -256,6 +296,9 @@ def moveLeft(node):
     # print("Can't go left")
     return False
 
+# Function to generate the nodes
+# Generates up, down, right and left movement nodes synchronously
+# Adds meta data to the nodes to parse in the end
 def generateNodes(node, parentId):
   global nodesToBeExplored
   upId = None
@@ -324,9 +367,10 @@ def generateNodes(node, parentId):
   else:
     if algorithmUsed.lower() == "gbf" or algorithmUsed.lower() == "astar":
         nodesToBeExplored = sortBasedOnDistance()
-        print(nodeTree[nodesToBeExplored[0]]["distance"], nodeTree[nodesToBeExplored[0]]["boxMoves"])
     return False
 
+# Method used only for gbf and astar
+# Sort the distance based on the non trivial or the manhattan distance
 def sortBasedOnDistance():
   emptyList = []
   for ids in nodesToBeExplored:
@@ -335,6 +379,8 @@ def sortBasedOnDistance():
   emptyList = [data['id'] for data in emptyList]
   return emptyList
 
+# Check which nodes are to be expanded and expand those nodes
+# Calculates the time taken for the complete execution of the program.
 def expandNodes():
   global itereations
   startTime = time.time()
@@ -351,14 +397,22 @@ def expandNodes():
       checkStackTrace(completed)
       print("It takes - " + str(itereations) + " node searches to get to the answer")
       print("It takes " + str(round(time.time() - startTime, 3)) + " seconds to get to the solution using " + algorithmUsed + " algo")
+      print("Number of unexpanded nodes - " + str(len(nodesToBeExplored)))
+      print("Total number of board states generated - " + str(len(generatedNodes)))
       break
+  if len(nodesToBeExplored) == 0:
+    print("Solution could not be found for the given board state")
 
+# Checks from which node the solution state is obtained and sends
+# that node to be backtracked
 def checkStackTrace(completedIds):
   for data in completedIds:
     if data is not None:
       if checkSolved(nodeTree[data]['node']):
         stackTrace(data, [], [chr])
-    
+
+# Method to print how the computer played the game
+# If we want to see it in action use -s while running the program
 def stackTrace(nodeId, moves, ids):
   if nodeTree[nodeId]['parentId'] == "firstNode":
     moves.reverse()
@@ -375,6 +429,7 @@ def stackTrace(nodeId, moves, ids):
     moves.append(nodeTree[nodeId]['move'])
     stackTrace(nodeTree[nodeId]['parentId'], moves, ids)
 
+# Program start
 if __name__ == "__main__":
     argumentList = sys.argv[1:]
     sample = []
